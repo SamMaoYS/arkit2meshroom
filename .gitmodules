@@ -2,3 +2,6 @@
 	path = dependencies/rapidjson
 	url = git@github.com:Tencent/rapidjson.git
 	ignore = all
+[submodule "dependencies/meshroom"]
+	path = dependencies/meshroom
+	url = git@github.com:3dlg-hcvc/meshroom.git
