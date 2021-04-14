@@ -19,6 +19,15 @@ cd meshroom/build/boost
 ./bootstrap.sh
 ./b2 install --prefix=../install -j 8
 ```
+
+### Build
+```
+mkdir build
+cd build
+cmake -DDEPENDENCIES_DIR=/path/to/dependencies ..
+make -j 8
+```
+
 ### Convert ARKit Information to data required by Meshroom
 `./run.sh`   
 `--in_sfm /path/to/MeshroomCache/StructureFromMotion/uid/cameras.sfm`  
