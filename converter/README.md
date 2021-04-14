@@ -29,10 +29,17 @@ make -j 8
 ```
 
 ### Convert ARKit Information to data required by Meshroom
+- assign known camera to poses cameras.sfm
 `./run.sh`   
 `--in_sfm /path/to/MeshroomCache/StructureFromMotion/uid/cameras.sfm`  
 `--in_traj /path/to/arkit/scanID/scanID.jsonl`  
 `--step frame_skip_step(int)`
 `--out_sfm /path/to/MeshroomCache/StructureFromMotion/uid/cameras_knwon.sfm`
 
-
+- assign sensor depth values to depth maps
+`./run.sh`   
+`--in_sfm /path/to/MeshroomCache/StructureFromMotion/uid/cameras.sfm`  
+`--in_exr /path/to/MeshroomCache/DepthMap/uid`  
+`--in_exr_abs /path/to/staging/scanID/depth`  
+`--step frame_skip_step(int)`
+`--out_exr /path/to/MeshroomCache/SensorDepth`
