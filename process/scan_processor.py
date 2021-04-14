@@ -267,6 +267,9 @@ def main():
     parser.add_argument('--cpus', dest='cpus', type=int, action='store',
                         required=False,
                         help='Specify the maximum number of cpus for meshroom reconstruction')
+    parser.add_argument('--gpus', dest='gpus', type=int, action='store',
+                        required=False,
+                        help='Specify the maximum number of gpus for meshroom reconstruction')
     parser.add_argument('--overwrite', dest='overwrite', action='store_true', default=False,
                         help='Overwrite existing files')
     parser.add_argument('--novh', dest='novh', action='store_true', default=False,
@@ -291,6 +294,10 @@ def main():
     if args.step:
         cfg.MAX_CPUS = args.cpus
         print(f'maximum number of cpus is changed to {args.cpus}')
+
+    if args.step:
+        cfg.MAX_GPUS = args.gpus
+        print(f'maximum number of gpus is changed to {args.gpus}')
 
     if args.meshroom_dir:
         cfg.PHOTOGRAMMETRY_RESULT_DIR = args.meshroom_dir
