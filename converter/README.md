@@ -41,5 +41,5 @@ make -j 8
 `--in_sfm /path/to/MeshroomCache/StructureFromMotion/uid/cameras.sfm`  
 `--in_exr /path/to/MeshroomCache/DepthMap/uid`  
 `--in_exr_abs /path/to/staging/scanID/depth`  
-`--step frame_skip_step(int)`
+`--step frame_skip_step(int)`  
 `--out_exr /path/to/MeshroomCache/SensorDepth`
