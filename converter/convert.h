@@ -30,14 +30,18 @@ public:
     void importCameras(const std::string& filepath, int step=2) override;
     void importMesh(const std::string& filepath) override;
 
+    // Assign camera poses from ARKit to Meshroom .sfm file
     void exportSFM(const std::string& filepath);
+
     void exportABC(const std::string& filepath);
     void exportMesh(const std::string& filepath) override;
 
+    // Convert ARKit depth to Meshroom depth maps
     bool assignSensorDepth(const std::string& depth_folder, const std::string& abs_depth_folder, const std::string& output_folder);
     bool linearizeSRGB(const std::string& srgb_folder, const std::string& output_folder);
 
 protected:
+    // Assign camera poses to sfm
     void linkKnownPoses();
     void buildABC();
     void removeLandmarksWithoutObservations();

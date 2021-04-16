@@ -72,10 +72,6 @@ vector<size_t> sort_indexes(const vector<T> &v) {
   vector<size_t> idx(v.size());
   iota(idx.begin(), idx.end(), 0);
 
-  // sort indexes based on comparing values in v
-  // using std::stable_sort instead of std::sort
-  // to avoid unnecessary index re-orderings
-  // when v contains elements of equal values 
   stable_sort(idx.begin(), idx.end(),
        [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
 
@@ -92,7 +88,7 @@ void Converter::buildABC() {
     auto intrinsics_array = _linker->getIntrinsicsArray();
     auto transform_array = _linker->getTransformArray();
     auto visibility = _linker->getAssociatedCameras();
-    auto points_luminance = _linker->getAssociatedLuminance();
+    auto points_score = _linker->getAssociatedScores();
 
     vector<IndexT> views_id(views.size());
     for (auto &view_iter : views) {
@@ -108,14 +104,14 @@ void Converter::buildABC() {
     float tol = 10;
     for (int p=0; p < visibility.size(); ++p) {
         auto & cameras = visibility[p];
-        auto & luminance_array = points_luminance[p];
+        auto & score_array = points_score[p];
 
         int max_count = 0;
         int index = -1;
-        for (int i=0; i<luminance_array.size(); ++i) {
+        for (int i=0; i<score_array.size(); ++i) {
             int count = 0;
-            for (int j=0; j<luminance_array.size(); ++j) {
-                if (isclose(luminance_array[i], luminance_array[j], tol))
+            for (int j=0; j<score_array.size(); ++j) {
+                if (isclose(score_array[i], score_array[j], tol))
                     count++;
             }
 
@@ -130,14 +126,14 @@ void Converter::buildABC() {
             continue;
         }
 
-        float majority = luminance_array[index];
+        float majority = score_array[index];
         vector<float> diffs(cameras.size());
         for (int idx = 0; idx < cameras.size(); ++idx) {
             // diffs[idx] = lum_diff(luminance_array[idx], majority);
-            diffs[idx] = fabs(luminance_array[idx]);
+            diffs[idx] = fabs(score_array[idx]);
         }
         vector<size_t> best_idx = sort_indexes<float>(diffs);
-        int k = 5;
+        int k = 15;
         vector<int> top_k;
         for (int i=0; i<k && i<best_idx.size(); i++) {
             top_k.emplace_back(cameras[best_idx[i]]);

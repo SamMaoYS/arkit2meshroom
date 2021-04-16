@@ -28,11 +28,20 @@ cmake -DDEPENDENCIES_DIR=/path/to/dependencies ..
 make -j 8
 ```
 
-### Convert ARKit Information to data required by Meshroom
+### Convert ARKit Camera Information to data required by Meshroom
 `./run.sh`   
 `--in_sfm /path/to/MeshroomCache/StructureFromMotion/uid/cameras.sfm`  
 `--in_traj /path/to/arkit/scanID/scanID.jsonl`  
 `--step frame_skip_step(int)`
 `--out_sfm /path/to/MeshroomCache/StructureFromMotion/uid/cameras_knwon.sfm`
 
+### Assign ARKit depth to Meshroom depth maps
 
+`./run.sh`
+`--in_exr /path/to/original_depth_maps_estimated_by_meshroom`
+`--in_exr_abs /path/to/arkit_depth_folder`
+`--step frame_skip_step(int)`
+`--in_sfm /path/to/cameras.sfm`
+`--out_exr /path/to/output/folder`
+
+### Import data into Meshroom

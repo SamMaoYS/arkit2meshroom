@@ -18,9 +18,11 @@ public:
     ObvLinker();
     ~ObvLinker();
 
+    // parse ARKit camera poses & intrinsics
     virtual void importCameras(const std::string& filepath, int step);
     virtual void importMesh(const std::string& filepath);
     virtual void exportMesh(const std::string& filepath);
+    // Assign visibility to mesh vertices
     void linkVertices(sfmData::SfMData & sfm_data);
     inline int getVertNum() const { return _positions.cols(); }
 
@@ -28,7 +30,7 @@ public:
     inline const RowMatrixX16f& getTransformArray() const { return _transform_array; };
     inline const RowMatrixX9f& getIntrinsicsArray() const { return _intrinsics_array; };
     inline const std::vector<std::vector<int>>& getAssociatedCameras() const { return _associated_cameras; }
-    inline const std::vector<std::vector<float>>& getAssociatedLuminance() const { return _associated_luminance; }
+    inline const std::vector<std::vector<float>>& getAssociatedScores() const { return _associated_scores; }
 
 private:
     MatrixXu _faces;
@@ -38,7 +40,7 @@ private:
     RowMatrixX9f _intrinsics_array;
     RowMatrixX16f _transform_array;
     std::vector<std::vector<int>> _associated_cameras;
-    std::vector<std::vector<float>> _associated_luminance;
+    std::vector<std::vector<float>> _associated_scores;
 };
 
 

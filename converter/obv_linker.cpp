@@ -97,7 +97,7 @@ void ObvLinker::linkVertices(sfmData::SfMData & sfm_data) {
     pos4 << _positions, Eigen::RowVectorXf::Ones(_positions.cols());
 
     _associated_cameras.resize(_positions.cols());
-    _associated_luminance.resize(_positions.cols());
+    _associated_scores.resize(_positions.cols());
     cout << _associated_cameras.size() << endl;
 
     for (int it = 0; it < num_cam; ++it) {
@@ -143,7 +143,7 @@ void ObvLinker::linkVertices(sfmData::SfMData & sfm_data) {
                 dist = sqrt(dist);
                 // float luminance = float(image(pixel(1), pixel(0)));
                 // _associated_luminance[p].emplace_back(luminance);
-                _associated_luminance[p].emplace_back(dist);
+                _associated_scores[p].emplace_back(dist);
             }
         }
     }
