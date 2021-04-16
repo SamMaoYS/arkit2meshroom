@@ -43,5 +43,3 @@ make -j 8
 `--step frame_skip_step(int)`
 `--in_sfm /path/to/cameras.sfm`
 `--out_exr /path/to/output/folder`
-
-### Import data into Meshroom
