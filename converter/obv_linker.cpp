@@ -12,6 +12,8 @@
 
 #include <rapidjson/document.h>
 
+#include <aliceVision/image/all.hpp>
+
 using namespace std;
 
 ObvLinker::ObvLinker() = default;
@@ -76,7 +78,7 @@ void ObvLinker::exportMesh(const string &filepath) {
     write_mesh(filepath, _faces, _positions, _normals);
 }
 
-void ObvLinker::linkVertices() {
+void ObvLinker::linkVertices(sfmData::SfMData & sfm_data) {
     if (!_intrinsics_array.size() || !_transform_array.size()) {
         cout << "Error: Empty cameras, please import camera data before link vertices!" << endl;
         return;
@@ -95,6 +97,7 @@ void ObvLinker::linkVertices() {
     pos4 << _positions, Eigen::RowVectorXf::Ones(_positions.cols());
 
     _associated_cameras.resize(_positions.cols());
+    _associated_luminance.resize(_positions.cols());
     cout << _associated_cameras.size() << endl;
 
     for (int it = 0; it < num_cam; ++it) {
@@ -109,19 +112,39 @@ void ObvLinker::linkVertices() {
 
         Eigen::Vector3f camera_z = transform.col(2).head(3);
         Eigen::VectorXf visibility_raw = _normals.transpose() * camera_z;
-        Eigen::Array<bool, Eigen::Dynamic, 1> visibility = (visibility_raw.array() < -0.5).array();
+        Eigen::Array<bool, Eigen::Dynamic, 1> visibility = (visibility_raw.array() < 0.0).array();
 
         float margin = 300;
+        float w = 1920;
+        float h = 1440;
         Eigen::Matrix2Xf pos2 = (project * pos4).colwise().hnormalized();
-        Eigen::Array<bool, Eigen::Dynamic, 1> x_in = (pos2.row(0).array() >= 0.0+margin).array() * (pos2.row(0).array() <= 1920-margin).array();
-        Eigen::Array<bool, Eigen::Dynamic, 1> y_in = (pos2.row(1).array() >= 0.0+margin).array() * (pos2.row(1).array() <= 1440-margin).array();
+        Eigen::Array<bool, Eigen::Dynamic, 1> x_in = (pos2.row(0).array() >= (0.0+margin)).array() * (pos2.row(0).array() < (1920-margin)).array();
+        Eigen::Array<bool, Eigen::Dynamic, 1> y_in = (pos2.row(1).array() >= (0.0+margin)).array() * (pos2.row(1).array() < (1440-margin)).array();
         Eigen::Array<bool, Eigen::Dynamic, 1> in = x_in * y_in * visibility;
         cout << in.cast<int>().sum() << " visible points in camera " << it << endl;
 
-#pragma omp parallel for
+        sfmData::Views &views = sfm_data.getViews();
+
+        vector<IndexT> views_id(views.size());
+        for (auto &view_iter : views) {
+            int cam_idx = stoi(utils::io::getFileName(view_iter.second->getImagePath(), false));
+            views_id[cam_idx] = view_iter.second->getViewId();
+        }        
+
+        // image::Image<image::RGBfColor> image;
+        // string src_img = views.at(views_id[it])->getImagePath();
+        // readImage(src_img, image, image::EImageColorSpace::LINEAR);
+
         for (int p = 0; p < _positions.cols(); p++) {
-            if (in(p))
+            if (in(p)) {
                 _associated_cameras[p].emplace_back(it);
+                Eigen::Vector2f pixel = pos2.col(p);
+                float dist = (pixel(0)-w/2.0)*(pixel(0)-w/2.0) + (pixel(1)-h/2.0)*(pixel(1)-h/2.0);
+                dist = sqrt(dist);
+                // float luminance = float(image(pixel(1), pixel(0)));
+                // _associated_luminance[p].emplace_back(luminance);
+                _associated_luminance[p].emplace_back(dist);
+            }
         }
     }
 }

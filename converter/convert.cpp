@@ -65,22 +65,96 @@ void Converter::linkKnownPoses() {
     }
 }
 
+template <typename T>
+vector<size_t> sort_indexes(const vector<T> &v) {
+
+  // initialize original index locations
+  vector<size_t> idx(v.size());
+  iota(idx.begin(), idx.end(), 0);
+
+  // sort indexes based on comparing values in v
+  // using std::stable_sort instead of std::sort
+  // to avoid unnecessary index re-orderings
+  // when v contains elements of equal values 
+  stable_sort(idx.begin(), idx.end(),
+       [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
+
+  return idx;
+}
+
 void Converter::buildABC() {
-    _linker->linkVertices();
+    _linker->linkVertices(_sfm_data);
 
     sfmData::Views &views = _sfm_data.getViews();
 
     int vert_num = _linker->getVertNum();
     auto positions = _linker->getPositions();
+    auto intrinsics_array = _linker->getIntrinsicsArray();
     auto transform_array = _linker->getTransformArray();
     auto visibility = _linker->getAssociatedCameras();
+    auto points_luminance = _linker->getAssociatedLuminance();
 
     vector<IndexT> views_id(views.size());
-    cout << "Number of cameras: " << views.size() << endl;
-
     for (auto &view_iter : views) {
         int cam_idx = stoi(utils::io::getFileName(view_iter.second->getImagePath(), false));
         views_id[cam_idx] = view_iter.second->getViewId();
+    }
+
+    auto isclose = [](float a, float b, float tol) { return fabs(a-b) < tol; };
+    auto lum_diff = [](float a, float b) { return fabs(a-b); };
+
+    // Pick cameras by pixel color
+    int zero_viz_count = 0;
+    float tol = 10;
+    for (int p=0; p < visibility.size(); ++p) {
+        auto & cameras = visibility[p];
+        auto & luminance_array = points_luminance[p];
+
+        int max_count = 0;
+        int index = -1;
+        for (int i=0; i<luminance_array.size(); ++i) {
+            int count = 0;
+            for (int j=0; j<luminance_array.size(); ++j) {
+                if (isclose(luminance_array[i], luminance_array[j], tol))
+                    count++;
+            }
+
+            if (count > max_count) {
+                max_count = count;
+                index = i;
+            }
+        }
+
+        if (index < 0) {
+            zero_viz_count++;
+            continue;
+        }
+
+        float majority = luminance_array[index];
+        vector<float> diffs(cameras.size());
+        for (int idx = 0; idx < cameras.size(); ++idx) {
+            // diffs[idx] = lum_diff(luminance_array[idx], majority);
+            diffs[idx] = fabs(luminance_array[idx]);
+        }
+        vector<size_t> best_idx = sort_indexes<float>(diffs);
+        int k = 5;
+        vector<int> top_k;
+        for (int i=0; i<k && i<best_idx.size(); i++) {
+            top_k.emplace_back(cameras[best_idx[i]]);
+        }
+        cameras = top_k;
+        cout << visibility[p].size() << " visible camera in point " << p << endl;
+    }
+    cout << zero_viz_count << " points have no visibility" << endl;
+    cout << "Number of cameras: " << views.size() << endl;
+    VectorXf intrinsics_param = intrinsics_array.row(0);
+    bool suc = _sfm_data.getIntrinsics().at(views.at(views_id[0])->getIntrinsicId())->updateFromParams( \
+        {intrinsics_param(0), intrinsics_param(6), intrinsics_param(7), 0, 0, 0});
+    
+    cout << suc << endl;
+
+    for (auto &view_iter : views) {
+        int cam_idx = stoi(utils::io::getFileName(view_iter.second->getImagePath(), false));
         Eigen::VectorXf transform = transform_array.row(cam_idx);
         Eigen::Map<Eigen::Matrix4f> transform_m(transform.data(), 4, 4);
         // camera pose to camera extrinsics
