@@ -32,10 +32,13 @@ public:
     inline const std::vector<std::vector<int>>& getAssociatedCameras() const { return _associated_cameras; }
     inline const std::vector<std::vector<float>>& getAssociatedScores() const { return _associated_scores; }
 
+    inline void assignColorMap(MatrixXf &colormap) { _colormap = colormap; }
+
 private:
     MatrixXu _faces;
     MatrixXf _positions;
-    MatrixXf _normals; // vertex normals
+    MatrixXf _normals;
+    MatrixXf _colormap; // vertex normals
     MatrixXu8 _colors;
     RowMatrixX9f _intrinsics_array;
     RowMatrixX16f _transform_array;

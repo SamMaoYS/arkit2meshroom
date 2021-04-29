@@ -25,7 +25,6 @@ public:
     ~Converter();
 
     void importSFM(const std::string& filename);
-    inline void importSRGB(const std::string& srgb_folder) {_srgb_folder=srgb_folder;}
 
     void importCameras(const std::string& filepath, int step=2) override;
     void importMesh(const std::string& filepath) override;
@@ -37,7 +36,7 @@ public:
     void exportMesh(const std::string& filepath) override;
 
     // Convert ARKit depth to Meshroom depth maps
-    bool assignSensorDepth(const std::string& depth_folder, const std::string& abs_depth_folder, const std::string& output_folder);
+    bool assignSensorDepth(const std::string& srgb_folder, const std::string& depth_folder, const std::string& output_folder);
     bool linearizeSRGB(const std::string& srgb_folder, const std::string& output_folder);
 
 protected:
@@ -49,7 +48,6 @@ protected:
 private:
     std::unique_ptr<ObvLinker> _linker;
     sfmData::SfMData _sfm_data;
-    std::string _srgb_folder;
 };
 
 

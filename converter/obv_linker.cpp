@@ -75,7 +75,11 @@ void ObvLinker::importMesh(const string &filepath) {
 }
 
 void ObvLinker::exportMesh(const string &filepath) {
-    write_mesh(filepath, _faces, _positions, _normals);
+    cout << _faces.rows() << " " << _faces.cols() << endl;
+    cout << _colormap.rows() << " " << _colormap.cols() << endl;
+    cout << _positions.rows() << " " << _positions.cols() << endl;
+    write_mesh(filepath, _faces, _positions, _normals, MatrixXf(), MatrixXf(), _colormap);
+    // write_mesh(filepath, _faces, _positions);
 }
 
 void ObvLinker::linkVertices(sfmData::SfMData & sfm_data) {
@@ -110,11 +114,11 @@ void ObvLinker::linkVertices(sfmData::SfMData & sfm_data) {
         transform = transform.inverse().eval();
         Eigen::Matrix<float, 3, 4> project = intrinsics * transform;
 
-        Eigen::Vector3f camera_z = transform.col(2).head(3);
+        Eigen::Vector3f camera_z = transform.row(2).head(3);
         Eigen::VectorXf visibility_raw = _normals.transpose() * camera_z;
         Eigen::Array<bool, Eigen::Dynamic, 1> visibility = (visibility_raw.array() < 0.0).array();
 
-        float margin = 300;
+        float margin = 0;
         float w = 1920;
         float h = 1440;
         Eigen::Matrix2Xf pos2 = (project * pos4).colwise().hnormalized();

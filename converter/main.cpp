@@ -151,14 +151,12 @@ int main(int argc, char *argv[]) {
             converter.importCameras(in_trajectory, step);
         if (!in_mesh.empty())
             converter.importMesh(in_mesh);
-        if (!in_srgb.empty())
-            converter.importSRGB(in_srgb);
         if (!out_abc.empty())
             converter.exportABC(out_abc);
         if (!out_sfm.empty())
             converter.exportSFM(out_sfm);
         if (!out_exr.empty())
-            converter.assignSensorDepth(in_exr, in_exr_abs, out_exr);
+            converter.assignSensorDepth(in_srgb, in_exr, out_exr);
         if (!out_mesh.empty())
             converter.exportMesh(out_mesh);
         if (!out_srgb.empty())
