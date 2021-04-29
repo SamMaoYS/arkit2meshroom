@@ -144,7 +144,7 @@ void Converter::buildABC() {
             diffs[idx] = fabs(score_array[idx]);
         }
         vector<size_t> best_idx = sort_indexes<float>(diffs);
-        int k = 5;
+        int k = 15;
         vector<int> top_k;
         for (int i=0; i<k && i<best_idx.size(); i++) {
             top_k.emplace_back(cameras[best_idx[i]]);
